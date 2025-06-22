@@ -1,0 +1,8 @@
+{
+  "name": "anonymous-comment-bot",
+  "version": "1.0.0",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.61.0",
+    "@supabase/supabase-js": "^2.21.0"
+  }
+}

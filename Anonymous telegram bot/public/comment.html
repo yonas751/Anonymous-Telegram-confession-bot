@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anonymous Comment</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Post Anonymous Comment</h1>
+    <div id="messageInfo" class="message-info">
+      <!-- Will be populated by JavaScript -->
+    </div>
+    <form id="commentForm">
+      <div class="form-group">
+        <label for="comment">Your Comment</label>
+        <textarea id="comment" placeholder="Type your comment here..." required></textarea>
+      </div>
+      <button type="submit" class="btn">Post Comment Anonymously</button>
+    </form>
+    <div class="status" id="statusMessage"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const messageId = urlParams.get('msg');
+
+      if (!messageId) {
+        document.getElementById('messageInfo').innerHTML = `
+          <div class="error">No message specified to comment on.</div>
+        `;
+        return;
+      }
+
+      document.getElementById('messageInfo').innerHTML = `
+        <p>You're commenting on anonymous message: <code>${messageId}</code></p>
+      `;
+
+      const commentForm = document.getElementById('commentForm');
+      commentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const comment = document.getElementById('comment').value;
+
+        try {
+          const response = await fetch('/.netlify/functions/comment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messageId, comment })
+          });
+
+          const result = await response.json();
+          if (response.ok) {
+            showStatus('Comment posted anonymously!', 'success');
+            commentForm.reset();
+          } else {
+            throw new Error(result.error || 'Failed to post comment');
+          }
+        } catch (error) {
+          showStatus(error.message, 'error');
+        }
+      });
+
+      function showStatus(message, type) {
+        const statusMessage = document.getElementById('statusMessage');
+        statusMessage.textContent = message;
+        statusMessage.className = 'status ' + type;
+      }
+    });
+  </script>
+</body>
+</html>
